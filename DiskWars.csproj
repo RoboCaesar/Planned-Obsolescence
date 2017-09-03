@@ -41,6 +41,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BigBoss.cs" />
     <Compile Include="Bullets.cs" />
     <Compile Include="Debris.cs" />
     <Compile Include="Enemies.cs" />

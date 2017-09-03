@@ -109,12 +109,22 @@ namespace DiskWars
                 HP = 30; //A bit tough to destroy.
                 dimensions = 16;
             }
+            if (type == 5) //Big boss
+            {
+                colX = 6;
+                colY = 10;
+                sizeX = 37;
+                sizeY = 38;
+                HP = 100;
+                dimensions = 48; //it's always a square shape!
+            }
         }
 
         public Rectangle GetSourceRectangle(int tileIndex, int frames = 3, int size = 30) //This allows us to find the correct sprite in the file
         {
             return new Rectangle((tileIndex % frames) * size, Convert.ToInt16(tileIndex / frames) * size, size, size);
         }
+
         public void Draw()
         {
             switch(type)
@@ -208,7 +218,7 @@ namespace DiskWars
                     }
                     if (currentAction == "Attack!")
                     {
-                        Game1.spriteBatch.Draw(Game1.ElectricAttacks, new Rectangle((int)x, (int)y - 7 - (int)bounce, 16, 16), new Rectangle(Game1.rnd.Next(0,9) * 16, 0, 16, 16), Color.White);
+                        Game1.spriteBatch.Draw(Game1.ElectricAttacks, new Rectangle((int)x, (int)y - 7 - (int)bounce, 16, 16), new Rectangle(Game1.rnd.Next(0, 9) * 16, 0, 16, 16), Color.White);
                     }
                     break;
                 case 4: //enemy spawner tile...I think
@@ -225,6 +235,44 @@ namespace DiskWars
                         if (spawnflash > 30) spawnflash = -1;
                     }
   
+                    break;
+                case 5: //Boss
+                    if (attacking == false)
+                    {  //collision area: x + 6, size 37, y + 6, size 34
+                        if (hurtInvincible == false)
+                        {
+                            if (spawning == false)
+                            {
+                                Game1.spriteBatch.Draw(Game1.Sprites, new Rectangle(x - 7, y + 18, 64, 30), GetSourceRectangle(12), Color.White);
+                                Game1.spriteBatch.Draw(Game1.BossSprites, new Rectangle(x, y - (int)bounce, 48, 48), GetSourceRectangle(Frame + 4 * Game1.DirDict[Dir], 4, 48), Color.White);
+                                if (Game1.rnd.Next(0, 100) < 95) Game1.spriteBatch.Draw(Game1.BossHappyFace, new Rectangle(x, y - (int)bounce, 48, 48), GetSourceRectangle(Frame + 4 * Game1.DirDict[Dir], 4, 48), Color.White);
+                            }
+                            else
+                            {
+                                for (int k = 0; k < 20; k++)
+                                {
+                                    if (k % 2 == 0)
+                                    {
+                                        Game1.spriteBatch.Draw(Game1.BossSprites, new Rectangle(x + (spawnTimer / 3), y - (int)bounce + k, 48, 1),
+                                        new Rectangle((Frame + 4 * Game1.DirDict[Dir] % 4) * 48, Convert.ToInt16(Frame + 4 * Game1.DirDict[Dir] / 4) * 48 + k, 48, 1), Color.White * (Convert.ToSingle(30 - spawnTimer) / 30f));
+                                    }
+                                    else
+                                    {
+                                        Game1.spriteBatch.Draw(Game1.BossSprites, new Rectangle(x - (spawnTimer / 3), y - (int)bounce + k, 48, 1),
+                                        new Rectangle((Frame + 4 * Game1.DirDict[Dir] % 4) * 48, Convert.ToInt16(Frame + 4 * Game1.DirDict[Dir] / 4) * 48 + k, 48, 1), Color.White * (Convert.ToSingle(30 - spawnTimer) / 30f));
+                                    }
+                                }
+                            }
+                        }
+
+                        else
+                        {
+                            Game1.spriteBatch.Draw(Game1.Sprites, new Rectangle(x - 7, y + 18, 64, 30), GetSourceRectangle(12), Color.White);
+                            if (hurtframe < 3)
+                                Game1.spriteBatch.Draw(Game1.BossSprites, new Rectangle(x, y - (int)bounce, 48, 48), GetSourceRectangle(Frame + 4 * Game1.DirDict[Dir], 4, 48), Color.White);
+                            else Game1.spriteBatch.Draw(Game1.BossSprites, new Rectangle(x, y - (int)bounce, 48, 48), GetSourceRectangle(Frame + 4 * Game1.DirDict[Dir] + 16, 4, 48), Color.White);
+                        }
+                    }
                     break;
             }
 
@@ -454,6 +502,10 @@ namespace DiskWars
             {
                 HoneyCrispLogic();
             }
+            else if (type == 5)
+            {
+                BigBossLogic();
+            }
 
             if (BeingKnockedback) Knockback();
             if (hurtInvincible)
@@ -473,26 +525,30 @@ namespace DiskWars
         {
             bool successfullyMoved = false;
             bool resetlengthofAction = false;
+            bool bigGuy = false; //Is the enemy big or not?
+
+            if (type == 5) bigGuy = true;
+
             switch (direction) //collision area: x + 2, size 11, y, size 8
             {
                 case "Up": //y - 1
-                    if (GameMap.HaveCollision(x + colX, y + colY - 1, sizeX, sizeY, true) == false) { this.y -= 1; successfullyMoved = true; }
+                    if (GameMap.HaveCollision(x + colX, y + colY - 1, sizeX, sizeY, true, bigGuy) == false) { this.y -= 1; successfullyMoved = true; }
                     else resetlengthofAction = true;
                     if (turnguy == true) Dir = "Up";
                     break;
                 case "Down": //y + 1
-                    if (GameMap.HaveCollision(x + colX, y + colY + 1, sizeX, sizeY, true) == false) { this.y += 1; successfullyMoved = true; }
+                    if (GameMap.HaveCollision(x + colX, y + colY + 1, sizeX, sizeY, true, bigGuy) == false) { this.y += 1; successfullyMoved = true; }
 
                     else resetlengthofAction = true;
                     if (turnguy == true) Dir = "Down";
                     break;
                 case "Left": //x - 1
-                    if (GameMap.HaveCollision(x + colX - 1, y + colY, sizeX, sizeY, true) == false) { this.x -= 1; successfullyMoved = true; }
+                    if (GameMap.HaveCollision(x + colX - 1, y + colY, sizeX, sizeY, true, bigGuy) == false) { this.x -= 1; successfullyMoved = true; }
                     else resetlengthofAction = true;
                     if (turnguy == true) Dir = "Left";
                     break;
                 case "Right": //x + 1
-                    if (GameMap.HaveCollision(x + colX + 1, y + colY, sizeX, sizeY, true) == false) { this.x += 1; successfullyMoved = true; }
+                    if (GameMap.HaveCollision(x + colX + 1, y + colY, sizeX, sizeY, true, bigGuy) == false) { this.x += 1; successfullyMoved = true; }
                     else resetlengthofAction = true;
                     if (turnguy == true) Dir = "Right";
                     break;
@@ -536,7 +592,7 @@ namespace DiskWars
 
             //You may wonder...why don't I just use the variable names that the enemy object already has? Well, I copied this code from the player class and I'm lazy sometimes.
             int Pcx = x + colX;
-            int Pcy = y+ colY;
+            int Pcy = y + colY;
             int Psx = sizeX; //sizes
             int Psy = sizeY;
 

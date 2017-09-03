@@ -12,7 +12,8 @@ namespace DiskWars
 {
     public static class GameMap
     {
-
+        private static int mapAnimationCount = 0;
+        private static int chimesRemaining = 10;
         public static int spawnFrequency = 500;
         public static int spawnTimer = 0;
         public static int spawnFlash = -1; //-1 implies that nothing is spawning there.
@@ -76,6 +77,7 @@ namespace DiskWars
             Game1.Hunter.bombsHeld = GameMap.bombsAtStartOfLevel;
             Windows.MessageFrame = -1;
             Game1.gameOverMode = false;
+            chimesRemaining = 10;
         }
 
         public static void LoadLevel(int whichlevel)
@@ -372,7 +374,7 @@ namespace DiskWars
                         {51, 0, 0,97,98,97,98, 0, 0, 0, 0, 0, 0,87,88,97,88, 0, 0,51,},
                         {51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,51,},
                         {51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,51,},
-                        {51, 0, 0,87,88,87,88, 0, 0, 0, 0, 0, 0,87,88,87,88, 0, 0,51,},
+                        {51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,51,},
                         {51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,51,},
                         {51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,51,},
                         {51, 0, 0,87,88,87,88, 0, 0, 0, 0, 0, 0,97,98,87,98, 0, 0,51,},
@@ -391,29 +393,45 @@ namespace DiskWars
 
                     spawnFrequency = 250;
                     LevelDifficulty = 3;
+                    cls = new Enemies(10 * 16, 5 * 16, 5);
+                    Game1.Opponents.Add(cls);
 
                     break;
                 default:
                     break;
             }
-
+            chimesRemaining = 10;
             LoadSpecialEntities();
         }
 
-        public static bool HaveCollision(int x, int y, int sizex, int sizey, bool avoidDanger=false)
+        public static bool HaveCollision(int x, int y, int sizex, int sizey, bool avoidDanger=false, bool bigEntity=false)
         {
             bool checking = false;
-            if (Index[Convert.ToInt16(y / 16), Convert.ToInt16(x / 16)] > 49) checking = true;
-            if (Index[Convert.ToInt16((y + sizey)/ 16), Convert.ToInt16(x / 16)] > 49) checking = true;
-            if (Index[Convert.ToInt16(y / 16), Convert.ToInt16((x + sizex)/ 16)] > 49) checking = true;
-            if (Index[Convert.ToInt16((y + sizey)/ 16), Convert.ToInt16((x + sizex)/ 16)] > 49) checking = true;
-            if (avoidDanger == true)
+            if (bigEntity == false) //If it's a small thing, we don't need to do anything fancy - Just check a few points on the map.
             {
-                if (Index[Convert.ToInt16(y / 16), Convert.ToInt16(x / 16)] == 8) checking = true;
-                if (Index[Convert.ToInt16((y + sizey) / 16), Convert.ToInt16(x / 16)] == 8) checking = true;
-                if (Index[Convert.ToInt16(y / 16), Convert.ToInt16((x + sizex) / 16)] == 8) checking = true;
-                if (Index[Convert.ToInt16((y + sizey) / 16), Convert.ToInt16((x + sizex) / 16)] == 8) checking = true;
+                if (Index[Convert.ToInt16(y / 16), Convert.ToInt16(x / 16)] > 49) checking = true;
+                if (Index[Convert.ToInt16((y + sizey) / 16), Convert.ToInt16(x / 16)] > 49) checking = true;
+                if (Index[Convert.ToInt16(y / 16), Convert.ToInt16((x + sizex) / 16)] > 49) checking = true;
+                if (Index[Convert.ToInt16((y + sizey) / 16), Convert.ToInt16((x + sizex) / 16)] > 49) checking = true;
+                if (avoidDanger == true)
+                {
+                    if (Index[Convert.ToInt16(y / 16), Convert.ToInt16(x / 16)] == 8) checking = true;
+                    if (Index[Convert.ToInt16((y + sizey) / 16), Convert.ToInt16(x / 16)] == 8) checking = true;
+                    if (Index[Convert.ToInt16(y / 16), Convert.ToInt16((x + sizex) / 16)] == 8) checking = true;
+                    if (Index[Convert.ToInt16((y + sizey) / 16), Convert.ToInt16((x + sizex) / 16)] == 8) checking = true;
+                }
             }
+            else //However, for bigger things, we ought to do a small loop. I had to implement this because otherwise the giant final boss could walk through tables.
+            {
+                for (var cy = 0; cy <= (sizey / 16); cy++)
+                {
+                    for (var cx = 0; cx <= (sizex / 16); cx++)
+                    {
+                        if (Index[Convert.ToInt16(y / 16) + cy, Convert.ToInt16(x / 16) + cx] > 49) checking = true;
+                    }
+                }
+            }
+
             return checking;
         }
 
@@ -435,6 +453,9 @@ namespace DiskWars
 
         public static void Draw(string layer="background")
         {
+
+            int exitX = -50;
+            int exitY = -50;
             if (layer == "background")
             {
                 for (int y = 0; y < 15; y++)
@@ -555,13 +576,35 @@ namespace DiskWars
                             }
 
                         }
+                        if (ObjectsRemaining <= 0 && Index[y, x] == 41)
+                        {
+                            exitX = x * 16;
+                            exitY = y * 16 + 16;
+                        }
                     }
+                }
+                //Draw the exit arrow if the player has finished.
+                if (ObjectsRemaining <= 0)
+                {
+                    if (mapAnimationCount % 3 == 0) Game1.spriteBatch.Draw(Game1.levelFinished, new Rectangle(exitX, exitY, 16, 24), Color.White);
                 }
             }
         }
 
         public static void Logic()
         {
+            mapAnimationCount++;
+            if (mapAnimationCount > 35) mapAnimationCount = 0;
+
+            if (ObjectsRemaining <= 0 && chimesRemaining > 0)
+            {
+                if (mapAnimationCount == 35)
+                {
+                    Game1.levelFinishedChime.Play(0.4f, 0.0f, 0.0f);
+                    chimesRemaining--;
+                }
+
+            }
 
             if (Index[(int)((Game1.Hunter.y + 12) / Game1.TILE_H), (int)((Game1.Hunter.x + 3) / Game1.TILE_W)] == 17 &&  //check to see if player is on spring.
                 Index[(int)((Game1.Hunter.y + 10 + 4) / Game1.TILE_H), (int)((Game1.Hunter.x + 3 + 9) / Game1.TILE_W)] == 17 &&
