@@ -174,11 +174,13 @@ namespace DiskWars
                 int sizeX = 9;
                 int sizeY = 8;
 
+                if (cls.CheckPlayerCollision(x + 3, y + 7, sizeX, sizeY)) foundHit = true;
+                /*
                 if (cls.x + cls.colX >= checkX && cls.x + cls.colX <= checkX + sizeX && cls.y + cls.colY >= checkY && cls.y + cls.colY <= checkY + sizeY) foundHit = true;
                 if (cls.x + cls.colX + cls.sizeX >= checkX && cls.x + cls.colX + cls.sizeX <= checkX + sizeX && cls.y + cls.colY >= checkY && cls.y + cls.colY <= checkY + sizeY) foundHit = true;
                 if (cls.x + cls.colX >= checkX && cls.x + cls.colX <= checkX + sizeX && cls.y + cls.colY + cls.sizeY >= checkY && cls.y + cls.colY + cls.sizeY <= checkY + sizeY) foundHit = true;
                 if (cls.x + cls.colX + cls.sizeX >= checkX && cls.x + cls.colX + cls.sizeX <= checkX + sizeX && cls.y + cls.colY + cls.sizeY >= checkY && cls.y + cls.colY + cls.sizeY <= checkY + sizeY) foundHit = true;
-
+                */
             }
 
             if (foundHit == true)
@@ -608,11 +610,14 @@ namespace DiskWars
             {
                 //enemy collision area: set in the enemy class area -> "colX" and "colY" are the coords of the upper left corners, and sizeX and sizeY give the size of the collision box.
                 bool foundHit = false; //This ugly list of if statements below...it's to check the four corners of the enemy hitbox. Sorry for the ugliness.
+
+                if (cls.CheckPlayerCollision(checkX, checkY, sizeX, sizeY)) foundHit = true;
+                /*
                 if (cls.x + cls.colX >= checkX && cls.x + cls.colX <= checkX + sizeX && cls.y + cls.colY>= checkY && cls.y + cls.colY <= checkY + sizeY) foundHit = true;
                 if (cls.x + cls.colX + cls.sizeX >= checkX && cls.x + cls.colX + cls.sizeX <= checkX + sizeX && cls.y + cls.colY >= checkY && cls.y + cls.colY <= checkY + sizeY) foundHit = true;
                 if (cls.x + cls.colX >= checkX && cls.x + cls.colX <= checkX + sizeX && cls.y + cls.colY + cls.sizeY >= checkY && cls.y + cls.colY + cls.sizeY <= checkY + sizeY) foundHit = true;
                 if (cls.x + cls.colX + cls.sizeX >= checkX && cls.x + cls.colX + cls.sizeX <= checkX + sizeX && cls.y + cls.colY + cls.sizeY >= checkY && cls.y + cls.colY + cls.sizeY <= checkY + sizeY) foundHit = true;
-
+                */
                 if (foundHit == true)
                 {
 

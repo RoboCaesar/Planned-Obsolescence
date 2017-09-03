@@ -44,6 +44,11 @@ namespace DiskWars
 
                 Game1.spriteBatch.Draw(Game1.ElectricAttacks, new Rectangle((int)x - 4, (int)y - 5, 16, 16), new Rectangle(frame * 16, 0, 16, 16), Color.White);
             }
+            if (type == 1) //cd attack
+            {
+
+                Game1.spriteBatch.Draw(Game1.cdAttacks, new Rectangle((int)x - 4, (int)y - 5, 16, 16), new Rectangle(frame * 16, 0, 16, 16), Color.White);
+            }
         }
 
         public void Logic()
@@ -55,6 +60,33 @@ namespace DiskWars
             {
                 if (flickerTick == 0) frame++;
                 if (frame > 9) frame = 0;
+                lengthOfExistence++;
+                if (GameMap.HaveCollision((int)x + 4, (int)y + 3, 2, 2) == true && lengthOfExistence > 8) //The enemy's bullets can penetrate walls for the first moments of their existence.
+                {
+                    active = false;
+                    var cls = new Explosions(x + 4, y + 4, 5);
+                    Game1.gameExplosions.Add(cls);
+                }
+
+                int checkX = (int)x;
+                int checkY = (int)y;
+                int sizeX = 10;
+                int sizeY = 8;
+                if (Game1.Hunter.CheckPlayerCollision(checkX, checkY, sizeX, sizeY) == true)
+                {
+                    active = false;
+                    var cls = new Explosions(x + 4, y + 4, 5);
+                    Game1.gameExplosions.Add(cls);
+                    Game1.Hunter.DamageDealt(5, "Up", false);
+                }
+
+                flickerTick++;
+                if (flickerTick > 1) flickerTick = 0;
+            }
+            if (type == 1)  //default screen attack
+            {
+                if (flickerTick == 0) frame++;
+                if (frame > 13) frame = 0;
                 lengthOfExistence++;
                 if (GameMap.HaveCollision((int)x + 4, (int)y + 3, 2, 2) == true && lengthOfExistence > 8) //The enemy's bullets can penetrate walls for the first moments of their existence.
                 {

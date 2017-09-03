@@ -40,7 +40,8 @@ namespace DiskWars
         public static Texture2D FloppySprites;
         public static Texture2D FastFloppySprites;
         public static Texture2D HoneyCrispSprites; //that mac style computer
-
+        public static Texture2D BossSprites;
+        public static Texture2D BossHappyFace;
 
         public static Texture2D ExplosionSprites;
         public static Texture2D CrackedGround;
@@ -54,6 +55,8 @@ namespace DiskWars
         public static Texture2D WindowSprites;
         public static Texture2D GameOver;
         public static Texture2D SnowSprites;
+        public static Texture2D levelFinished;
+        public static Texture2D cdAttacks;
 
         //public GameMap Arena = new GameMap();
 
@@ -78,6 +81,8 @@ namespace DiskWars
         public static SoundEffect Jump;
         public static SoundEffect Press;
         public static SoundEffect GameOverSound;
+        public static SoundEffect levelFinishedChime;
+        public static SoundEffect Shot;
 
         public static SpriteFont gameFont;
         public static SpriteFont gameFont2;
@@ -157,6 +162,8 @@ namespace DiskWars
             FloppySprites = Content.Load<Texture2D>("images/floppyguy");
             FastFloppySprites = Content.Load<Texture2D>("images/fastfloppy");
             HoneyCrispSprites = Content.Load<Texture2D>("images/oldhoneycrisp");
+            BossSprites = Content.Load<Texture2D>("images/boss");
+            BossHappyFace = Content.Load<Texture2D>("images/boss_happyfaces");
 
             AttackSprites = Content.Load<Texture2D>("images/hunterattack");
             CrackedGround = Content.Load<Texture2D>("images/nuclearexplosion");
@@ -170,7 +177,8 @@ namespace DiskWars
             WindowSprites = Content.Load<Texture2D>("images/windows");
             GameOver = Content.Load<Texture2D>("images/gameover");
             SnowSprites = Content.Load<Texture2D>("images/snow");
-
+            levelFinished = Content.Load<Texture2D>("images/levelfinished");
+            cdAttacks = Content.Load<Texture2D>("images/cdattacks");
 
 
             HammerHit = Content.Load<SoundEffect>("sounds/hit");
@@ -187,6 +195,8 @@ namespace DiskWars
             Jump = Content.Load<SoundEffect>("sounds/jump2");
             Press = Content.Load<SoundEffect>("sounds/press");
             GameOverSound = Content.Load<SoundEffect>("sounds/gameover");
+            levelFinishedChime = Content.Load<SoundEffect>("sounds/levelfinished");
+            Shot = Content.Load<SoundEffect>("sounds/shot");
 
             gameFont = Content.Load<SpriteFont>("ThisGame");
             gameFont2 = Content.Load<SpriteFont>("Message");
@@ -756,5 +766,7 @@ namespace DiskWars
             spriteBatch.End();
             base.Draw(gameTime);
         }
+
+
     }
 }
